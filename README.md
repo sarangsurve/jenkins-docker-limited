@@ -25,7 +25,7 @@ Run a lightweight, resource-constrained Jenkins server in Docker with persistent
 
 ## 🔧 Usage
 
-### 🟢 Default (Port: 8080, RAM: 1GB, Disk: 8GB)
+### 🟢 Default (Port: 8080, RAM: 1GB, Disk: 8GB, Mount Dir: "$HOME/jenkins_volume")
 
 ```bash
 bash run_jenkins_limited.sh
@@ -36,24 +36,23 @@ bash run_jenkins_limited.sh
 ### ⚙️ With Custom Options
 
 ```bash
-bash run_jenkins_limited.sh --port 8090 --ram 500m --disk 8
+bash run_jenkins_limited.sh --port 8090 --ram 500m --disk 8 --mount-dir ~/custom_jenkins_volume
 ```
 
-| Flag        | Description                           | Example        |
-|-------------|---------------------------------------|----------------|
-| `--port`    | Port to expose Jenkins Web UI         | `8090`         |
-| `--ram`     | RAM limit for the container           | `500m`, `1g`   |
-| `--disk`    | Disk limit in GB                      | `8`            |
-
-> Once started, open Jenkins at: [http://localhost:8090](http://localhost:8090)
+| Flag          | Description                            | Example                |
+|---------------|----------------------------------------|------------------------|
+| `--port`      | Port to expose Jenkins Web UI          | `8090`                 |
+| `--ram`       | RAM limit for the container            | `500m`, `1g`           |
+| `--disk`      | Disk limit in GB                       | `8`                    |
+| `--mount-dir` | Custom path to mount Jenkins volume    | `~/my_jenkins_data`    |
 
 ---
 
 ## 📁 What the Script Does
 
 1. Pulls the latest `jenkins/jenkins:lts` Docker image
-2. Creates an 8GB loopback disk image at `~/jenkins_volume.img`
-3. Mounts the image to `~/jenkins_volume`
+2. Creates a loopback disk image at `<mount-dir>/jenkins_volume.img` (default: `~/jenkins_volume.img`)
+3. Mounts the image to the specified `--mount-dir` path
 4. Runs the Jenkins container with:
     - RAM limit using Docker’s `--memory` flag
     - Disk limit using loopback-mounted volume
@@ -71,7 +70,7 @@ docker stats jenkins
 
 ### Disk
 ```bash
-df -h ~/jenkins_volume
+df -h <your_mount_dir>
 ```
 
 ---
@@ -83,8 +82,8 @@ To completely stop and remove Jenkins and its data:
 ```bash
 docker stop jenkins
 docker rm jenkins
-sudo umount ~/jenkins_volume
-rm -rf ~/jenkins_volume ~/jenkins_volume.img
+sudo umount <your_mount_dir>
+rm -rf <your_mount_dir> <your_mount_dir>/jenkins_volume.img
 ```
 
 ---
